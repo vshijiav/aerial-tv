@@ -370,11 +370,16 @@
   <h2 data-i18n="weather"></h2>
   <div class="list">
     <label class="item"><span class="txt" data-i18n="sw_weather"></span><input class="switch" type="checkbox" id="swWeather" data-setting="showWeather"></label>
+    <label class="item"><span class="txt" data-i18n="sw_fahrenheit"></span><input class="switch" type="checkbox" id="swFahrenheit" data-setting="fahrenheit"></label>
     <div class="item wx"><b id="wxNow">—</b><span id="wxPlace"></span></div>
     <form class="item field" id="cityForm">
       <input id="city" type="text" data-i18n-placeholder="city_ph" enterkeyhint="done" autocomplete="off">
       <button class="link" id="cityBtn" data-i18n="set" disabled></button>
     </form>
+  </div>
+  <div id="cityPicks" hidden>
+    <p class="foot" id="cityPickHint"></p>
+    <div class="list" id="cityPickList"></div>
   </div>
   <p class="foot" id="wxHint"></p>
 
@@ -424,7 +429,7 @@ let state = null, stateJson = '';
 
 // The language: ?lang=ru in the address, else the one picked under More (kept on the phone), else the
 // first of the phone's preferred languages that has a table, else English. Keys are in KEYS, one array of texts per language.
-const KEYS = ["screensaver", "screensaver_short", "ss_aerial", "ss_photos", "ss_clock", "focus", "focus_high", "focus_standard", "weather", "city_ph", "set", "upload_label", "feedback_h", "feedback_hint", "diag_show", "diag_copy", "diag_github", "hint_aerial", "hint_photos", "hint_clock", "g_live", "g_live_sub", "g_daily", "g_daily_sub", "g_photo", "g_builtin", "g_auto", "toast_wallpaper", "aria_delete", "confirm_delete", "wx_clear", "wx_partlycloudy", "wx_cloudy", "wx_fog", "wx_rain", "wx_snow", "wx_thunder", "wx_chosen", "wx_auto_btn", "toast_auto", "wx_guessed", "wx_none", "tag_source", "aria_rename", "toast_renamed", "toast_name_reset", "toast_rename_fail", "aria_reset_icon", "toast_icon_reset", "focus_hint_standard", "focus_hint_high", "daily_title", "daily_caption", "rotate_title", "rotate_caption", "empty_photos", "add_second", "toast_tv_updated", "sending_n", "toast_added", "toast_no_photos", "toast_send_fail", "toast_city_set", "toast_city_nf", "toast_set_fail", "toast_sending_icon", "toast_icon_set", "toast_icon_bad", "diag_collecting", "toast_diag_fail", "toast_copied", "toast_copy_manual", "language", "hint_follows", "ss_videos", "hint_videos", "videos_h", "videos_upload", "videos_hint", "videos_empty", "confirm_video_delete", "toast_videos_added", "toast_video_bad", "sending_video", "hint_system", "tab_home", "tab_more", "current_wp", "cancel", "save", "name_ph", "rename_hint", "change_icon", "this_tv", "folder_count", "folder_ph", "inputs_h", "inputs_hint", "rename_hint_app", "was_named", "arrange_hint", "arrange_unready", "hidden_h", "hidden_none", "hidden_locked", "show_app", "hide_app", "to_folder", "new_folder", "out_of_folder", "ungroup", "ungroup_confirm", "folder_hint", "toast_hidden", "toast_shown", "toast_in_folder", "toast_out_folder", "toast_ungrouped", "tab_looks", "looks_title", "show_on_home", "source_device", "source_plain", "source_device_hint", "tv_model", "sw_always", "sw_always_sub", "sw_weather", "sw_saver_time", "sw_saver_time_sub", "sw_saver_place", "sw_saver_place_sub", "g_source_sub", "icon_h", "icon_library", "icon_own", "icon_custom", "toast_icon_picked", "drop_hint", "drop_sub", "drop_none", "toast_diag_paste", "kids_h", "elders_h", "kids_used", "kids_left", "kids_nolimit", "kids_allowed", "kids_lock_day", "kids_lock_late", "kids_lock_break", "kids_pin_ph", "kids_unlock", "kids_wrong", "kids_need_pin", "kids_locked_foot", "kids_add", "kids_day", "kids_leave_k", "kids_leave_e", "kids_paused", "kids_resume", "kids_min", "kids_hm", "kids_erase", "kids_hr", "kids_both", "kids_off_line", "kids_settings", "kids_no_pin", "kids_pin_foot", "ks_meta", "ks_on", "ks_on_sub", "ks_block", "ks_block_sub", "ks_block_noguard", "ks_time_h", "ks_weekday", "ks_weekend", "ks_minutes", "ks_nolimit", "ks_window", "ks_from", "ks_to", "ks_break", "ks_break_every", "ks_break_len", "ks_time_foot", "ks_apps", "ks_apps_sub", "ks_input", "ks_save", "ks_saved", "ks_invalid", "ks_for", "wx_temp", "ss_sleep", "hint_sleep", "power_off", "power_off_confirm", "power_off_done", "power_off_fail", "icon_more", "icon_more_hint", "icon_more_fail", "icon_search_ph", "icon_search_none"];
+const KEYS = ["screensaver", "screensaver_short", "ss_aerial", "ss_photos", "ss_clock", "focus", "focus_high", "focus_standard", "weather", "city_ph", "set", "upload_label", "feedback_h", "feedback_hint", "diag_show", "diag_copy", "diag_github", "hint_aerial", "hint_photos", "hint_clock", "g_live", "g_live_sub", "g_daily", "g_daily_sub", "g_photo", "g_builtin", "g_auto", "toast_wallpaper", "aria_delete", "confirm_delete", "wx_clear", "wx_partlycloudy", "wx_cloudy", "wx_fog", "wx_rain", "wx_snow", "wx_thunder", "wx_chosen", "wx_auto_btn", "toast_auto", "wx_guessed", "wx_none", "tag_source", "aria_rename", "toast_renamed", "toast_name_reset", "toast_rename_fail", "aria_reset_icon", "toast_icon_reset", "focus_hint_standard", "focus_hint_high", "daily_title", "daily_caption", "rotate_title", "rotate_caption", "empty_photos", "add_second", "toast_tv_updated", "sending_n", "toast_added", "toast_no_photos", "toast_send_fail", "toast_city_set", "toast_city_nf", "toast_set_fail", "toast_sending_icon", "toast_icon_set", "toast_icon_bad", "diag_collecting", "toast_diag_fail", "toast_copied", "toast_copy_manual", "language", "hint_follows", "ss_videos", "hint_videos", "videos_h", "videos_upload", "videos_hint", "videos_empty", "confirm_video_delete", "toast_videos_added", "toast_video_bad", "sending_video", "hint_system", "tab_home", "tab_more", "current_wp", "cancel", "save", "name_ph", "rename_hint", "change_icon", "this_tv", "folder_count", "folder_ph", "inputs_h", "inputs_hint", "rename_hint_app", "was_named", "arrange_hint", "arrange_unready", "hidden_h", "hidden_none", "hidden_locked", "show_app", "hide_app", "to_folder", "new_folder", "out_of_folder", "ungroup", "ungroup_confirm", "folder_hint", "toast_hidden", "toast_shown", "toast_in_folder", "toast_out_folder", "toast_ungrouped", "tab_looks", "looks_title", "show_on_home", "source_device", "source_plain", "source_device_hint", "tv_model", "sw_always", "sw_always_sub", "sw_weather", "sw_saver_time", "sw_saver_time_sub", "sw_saver_place", "sw_saver_place_sub", "g_source_sub", "icon_h", "icon_library", "icon_own", "icon_custom", "toast_icon_picked", "drop_hint", "drop_sub", "drop_none", "toast_diag_paste", "kids_h", "elders_h", "kids_used", "kids_left", "kids_nolimit", "kids_allowed", "kids_lock_day", "kids_lock_late", "kids_lock_break", "kids_pin_ph", "kids_unlock", "kids_wrong", "kids_need_pin", "kids_locked_foot", "kids_add", "kids_day", "kids_leave_k", "kids_leave_e", "kids_paused", "kids_resume", "kids_min", "kids_hm", "kids_erase", "kids_hr", "kids_both", "kids_off_line", "kids_settings", "kids_no_pin", "kids_pin_foot", "ks_meta", "ks_on", "ks_on_sub", "ks_block", "ks_block_sub", "ks_block_noguard", "ks_time_h", "ks_weekday", "ks_weekend", "ks_minutes", "ks_nolimit", "ks_window", "ks_from", "ks_to", "ks_break", "ks_break_every", "ks_break_len", "ks_time_foot", "ks_apps", "ks_apps_sub", "ks_input", "ks_save", "ks_saved", "ks_invalid", "ks_for", "wx_temp", "ss_sleep", "hint_sleep", "power_off", "power_off_confirm", "power_off_done", "power_off_fail", "icon_more", "icon_more_hint", "icon_more_fail", "icon_search_ph", "icon_search_none", "sw_fahrenheit", "wx_pick", "wx_temp_f"];
 const TEXTS = {
  "zh": [
   "屏幕保护程序",
@@ -634,7 +639,10 @@ const TEXTS = {
   "图标库里所有的图，任何一张都能给这个 App 用。图片从 Aerial 官网加载，手机要能上网。",
   "图标库没加载出来：电视或手机连不上 Aerial 官网。",
   "搜索 App 名称或包名",
-  "没有找到。换个叫法试试，或者输入包名。"
+  "没有找到。换个叫法试试，或者输入包名。",
+  "华氏度（°F）",
+  "有好几个地方叫「{name}」，是哪一个？",
+  "{n}℉"
  ],
  "en": [
   "Screensaver",
@@ -844,7 +852,10 @@ const TEXTS = {
   "Every picture in the icon library; any of them can be this app's. They load from Aerial's website, so the phone needs the internet.",
   "The icon library did not load: the TV or the phone cannot reach Aerial's website.",
   "Search an app name or package",
-  "Nothing found. Try another name for it, or its package name."
+  "Nothing found. Try another name for it, or its package name.",
+  "Fahrenheit (°F)",
+  "Several places are called {name}. Which one?",
+  "{n}°"
  ],
  "ru": [
   "Заставка",
@@ -1054,7 +1065,10 @@ const TEXTS = {
   "Все картинки библиотеки значков; любую можно назначить этому приложению. Они загружаются с сайта Aerial, телефону нужен интернет.",
   "Библиотека значков не загрузилась: телевизор или телефон не может связаться с сайтом Aerial.",
   "Найти по названию или пакету",
-  "Ничего не найдено. Попробуйте другое название или имя пакета."
+  "Ничего не найдено. Попробуйте другое название или имя пакета.",
+  "Градусы Фаренгейта (°F)",
+  "Мест с названием «{name}» несколько. Какое из них?",
+  "{n}°"
  ],
  "uk": [
   "Заставка",
@@ -1264,7 +1278,10 @@ const TEXTS = {
   "Усі картинки бібліотеки значків; будь-яку можна призначити цьому застосунку. Вони завантажуються з сайту Aerial, телефону потрібен інтернет.",
   "Бібліотека значків не завантажилася: телевізор або телефон не може з'єднатися із сайтом Aerial.",
   "Знайти за назвою або пакетом",
-  "Нічого не знайдено. Спробуйте іншу назву або назву пакета."
+  "Нічого не знайдено. Спробуйте іншу назву або назву пакета.",
+  "Градуси Фаренгейта (°F)",
+  "Місць із назвою «{name}» кілька. Яке з них?",
+  "{n}°"
  ],
  "kk": [
   "Экран қорғаушы",
@@ -1474,7 +1491,10 @@ const TEXTS = {
   "Белгішелер кітапханасындағы барлық сурет; кез келгенін осы қолданбаға беруге болады. Олар Aerial сайтынан жүктеледі, телефонға интернет керек.",
   "Белгішелер кітапханасы жүктелмеді: теледидар не телефон Aerial сайтына қосыла алмайды.",
   "Қолданба атауын не бумасын іздеу",
-  "Ештеңе табылмады. Басқа атауын не бума атауын жазып көріңіз."
+  "Ештеңе табылмады. Басқа атауын не бума атауын жазып көріңіз.",
+  "Фаренгейт (°F)",
+  "«{name}» деген жер бірнешеу. Қайсысы?",
+  "{n}°"
  ]
 };
 const LANGS = Object.keys(TEXTS);
@@ -1822,9 +1842,10 @@ window.addEventListener('drop', e => {
 const weatherNames = { clear: t('wx_clear'), partlycloudy: t('wx_partlycloudy'), cloudy: t('wx_cloudy'), fog: t('wx_fog'), rain: t('wx_rain'), snow: t('wx_snow'), thunder: t('wx_thunder') };
 function renderMore() {
   $('#swWeather').checked = state.showWeather !== false;
+  $('#swFahrenheit').checked = !!state.fahrenheit;
   document.querySelectorAll('#focus [data-style]').forEach(b => b.setAttribute('aria-checked', b.dataset.style === state.focusStyle ? 'true' : 'false'));
   const w = state.weather || {};
-  $('#wxNow').textContent = w.celsius !== undefined ? `${t('wx_temp', { n: w.celsius })} ${weatherNames[w.kind] || ''}` : '—';
+  $('#wxNow').textContent = w.degrees !== undefined ? `${t(state.fahrenheit ? 'wx_temp_f' : 'wx_temp', { n: w.degrees })} ${weatherNames[w.kind] || ''}` : '—';
   $('#wxPlace').textContent = w.place || '';
   const hint = $('#wxHint'); hint.replaceChildren();
   if (w.chosen) {
@@ -1865,20 +1886,47 @@ async function setting(sw) {
   } catch (e) { sw.checked = !on; toast(t('toast_set_fail')); }
   sw.disabled = false;
 }
-['#swSaverTime', '#swSaverPlace', '#swWeather'].forEach(id => $(id).onchange = () => setting($(id)));
+['#swSaverTime', '#swSaverPlace', '#swWeather', '#swFahrenheit'].forEach(id => $(id).onchange = () => setting($(id)));
 document.querySelectorAll('#focus [data-style]').forEach(b => b.onclick = async () => {
   if (b.dataset.style === state.focusStyle) return;
   try { take(await api('api/focus', { style: b.dataset.style })); toast(t('toast_tv_updated')); } catch (e) { toast(t('toast_set_fail')); }
 });
-$('#city').oninput = () => $('#cityBtn').disabled = !$('#city').value.trim();
+/* A city: every place of that name is listed to pick from, since many share one; a single one is set at once. */
+function hidePicks() { $('#cityPicks').hidden = true; $('#cityPickList').replaceChildren(); }
+async function chooseCity(place) {
+  const next = await api('api/weather/city', { name: place.name, lat: place.lat, lon: place.lon }); take(next);
+  if (!next.found) throw new Error('not set');
+  hidePicks(); $('#city').value = ''; $('#cityBtn').disabled = true;
+  toast(t('toast_city_set', { place: next.weather.place }));
+}
+$('#city').oninput = () => { $('#cityBtn').disabled = !$('#city').value.trim(); hidePicks(); };
 $('#cityForm').onsubmit = async e => {
   e.preventDefault();
   const name = $('#city').value.trim(); if (!name) return;
-  const btn = $('#cityBtn'); btn.disabled = true; $('#city').blur();
+  const btn = $('#cityBtn'); btn.disabled = true; $('#city').blur(); hidePicks();
   try {
-    const next = await api('api/weather/city', { name }); take(next);
-    toast(next.found ? t('toast_city_set', { place: next.weather.place }) : t('toast_city_nf', { name }));
-    if (next.found) $('#city').value = '';
+    const found = await api('api/weather/search', { name });
+    const places = found.places || [];
+    if (!found.ok) toast(t('toast_set_fail'));
+    else if (!places.length) toast(t('toast_city_nf', { name }));
+    else if (places.length === 1) await chooseCity(places[0]);
+    else {
+      $('#cityPickHint').textContent = t('wx_pick', { name });
+      const list = $('#cityPickList');
+      for (const p of places) {
+        const b = el('button', 'item');
+        const txt = el('span', 'txt', p.name);
+        if (p.region) txt.appendChild(el('span', 'sub', p.region));
+        b.appendChild(txt);
+        b.onclick = async () => {
+          list.querySelectorAll('button').forEach(x => x.disabled = true);
+          try { await chooseCity(p); } catch (err) { toast(t('toast_set_fail')); list.querySelectorAll('button').forEach(x => x.disabled = false); }
+        };
+        list.appendChild(b);
+      }
+      $('#cityPicks').hidden = false;
+      $('#cityPicks').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   } catch (err) { toast(t('toast_set_fail')); }
   btn.disabled = !$('#city').value.trim();
 };
