@@ -926,6 +926,15 @@ object SystemProbe {
         runCatching { context.packageManager.getPackageInfo("com.tcl.sourcemananger", 0) }.isSuccess
 
     /**
+     * Hisense's Google TV firmware (Hisense 75U7, "SmartTV 4K FFM", MediaTek, Google
+     * TV 12 / Android 12): com.vt.tv.input shows the firmware's Inputs window on the remote's input
+     * key and lets the key through as well, so Aerial's Inputs page came up beside it. Known by the
+     * package.
+     */
+    fun hisenseVtInputPanel(context: Context): Boolean =
+        runCatching { context.packageManager.getPackageInfo("com.vt.tv.input", 0) }.isSuccess
+
+    /**
      * Coocaa's Quick Panel (Skyworth 75A7D, 8R134_A7D, Android 11): the firmware opens its own
      * signal-source panel on the remote's input key, from a window of com.coocaa.os.ccosservice,
      * and lets the key through as well, so Aerial's Inputs page was drawn under it.
