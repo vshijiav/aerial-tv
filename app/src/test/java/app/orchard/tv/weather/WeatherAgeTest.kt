@@ -6,7 +6,7 @@ import org.junit.Test
 
 class WeatherAgeTest {
     private val hour = 60 * 60 * 1000L
-    private val reading = WeatherNow(12, WeatherKind.Clear, day = true, readAt = 1_000_000_000L)
+    private val reading = WeatherNow(12.0,WeatherKind.Clear, day = true, readAt = 1_000_000_000L)
 
     @Test
     fun aFreshReadingShowsNoAge() {
