@@ -418,16 +418,20 @@ fun WallpaperSheet(
                 SectionTitle(R.string.cc_about)
                 Group(stringResource(R.string.cc_about_version, Updates.current) + " · " + BuildConfig.FLAVOR) { note ->
                     val latest = Updates.available
-                    SettingRow(R.string.cc_about_update, null, note, first = true) {
-                        // Now the last row that takes focus: bring the note under it into view too.
-                        Box(Modifier.onFocusChanged { if (it.hasFocus) scope.launch { scroll.animateScrollTo(scroll.maxValue) } }) {
-                            ActionChip(
-                                latest?.let { stringResource(R.string.cc_update_to, it) } ?: stringResource(R.string.cc_about_latest),
-                                Glyph.ChevronRight,
-                                // Nothing newer known: look again now.
-                                onClick = { if (latest != null) onUpdate() else Updates.checkIfStale(force = true) },
-                            )
+                    // A personal build carries changes no release has: no update row at all.
+                    if (BuildConfig.OFFICIAL_UPDATES) {
+                        SettingRow(R.string.cc_about_update, null, note, first = true) {
+                            // Now the last row that takes focus: bring the note under it into view too.
+                            Box(Modifier.onFocusChanged { if (it.hasFocus) scope.launch { scroll.animateScrollTo(scroll.maxValue) } }) {
+                                ActionChip(
+                                    latest?.let { stringResource(R.string.cc_update_to, it) } ?: stringResource(R.string.cc_about_latest),
+                                    Glyph.ChevronRight,
+                                    // Nothing newer known: look again now.
+                                    onClick = { if (latest != null) onUpdate() else Updates.checkIfStale(force = true) },
+                                )
+                            }
                         }
+                        Box(Modifier.padding(start = 18.dp).fillMaxWidth().height(1.dp).background(Palette.Hairline))
                     }
                     val (dot, label) = when (homeStatus) {
                         HomeStatus.Default -> Palette.Green to R.string.cc_home_default
@@ -435,7 +439,6 @@ fun WallpaperSheet(
                         HomeStatus.NotDefault -> Palette.Orange to R.string.cc_home_not_default
                     }
                     // Not a control: shown as a row of the group, without focus.
-                    Box(Modifier.padding(start = 18.dp).fillMaxWidth().height(1.dp).background(Palette.Hairline))
                     Row(Modifier.fillMaxWidth().height(58.dp).padding(start = 18.dp, end = 24.dp), verticalAlignment = Alignment.CenterVertically) {
                         BasicText(stringResource(label), style = Type.Body, modifier = Modifier.weight(1f), maxLines = 1)
                         Box(Modifier.size(10.dp).clip(CircleShape).background(dot))
