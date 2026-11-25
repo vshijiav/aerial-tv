@@ -301,7 +301,8 @@ fun HomeScreen(
     val firmwareInputPanel = remember {
         SystemProbe.tclInputPanel(appContext) != null || SystemProbe.coocaaInputPanel(appContext) ||
             SystemProbe.tianciInputPanel(appContext) || SystemProbe.tclSourceManagerPanel(appContext) ||
-            SystemProbe.hisenseVtInputPanel(appContext)
+            SystemProbe.hisenseVtInputPanel(appContext) ||
+            SystemProbe.tclQuickPanel(appContext)
     }
 
     var focusedKey by remember { mutableStateOf<String?>(null) }
@@ -978,6 +979,7 @@ fun HomeScreen(
             onClose = { vm.overlay = Overlay.None },
             warm = ccWarm,
             onShelf = !pastShelf,
+            focusInputSettings = (overlay as? Overlay.ControlCenter)?.focusInputSettings == true,
         )
 
         FolderView(

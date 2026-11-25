@@ -19,8 +19,11 @@ android {
         // Android 5.0. Compose 1.10 and later need 6.0, so the Compose BOM below stays on 1.9.
         minSdk = 21
         targetSdk = 34
-        versionCode = 161
-        versionName = "2.17-vshijiav.1"
+        versionCode = 166
+        versionName = "2.19-vshijiav.2"
+        // Personal build: the official releases must not be offered while the weather and icon
+        // editor PRs are still open upstream (pengchujin/aerial-tv#1620).
+        buildConfigField("boolean", "OFFICIAL_UPDATES", "false")
         // `./gradlew -Pdiag ...`: a build for one reporter's TV whose logcat shows no app lines;
         // see system/DiagLog.kt.
         val diag = project.hasProperty("diag")
