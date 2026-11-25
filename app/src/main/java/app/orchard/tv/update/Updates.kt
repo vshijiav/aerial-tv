@@ -89,6 +89,15 @@ object Updates {
         started = true
         appContext = context.applicationContext
         prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        // A personal build carries changes no release has yet; the official version is not an
+        // update for it, so it neither looks for one nor keeps one found by an older build.
+        if (!BuildConfig.OFFICIAL_UPDATES) {
+            prefs.edit {
+                remove("latest"); remove("checked_at"); remove("notes"); remove("notes_for")
+            }
+            available = null
+            return
+        }
         available = prefs.getString("latest", null)?.takeIf { newer(it, current) }
         checker = UpdateCheck(
             scope = scope,
@@ -118,6 +127,7 @@ object Updates {
         maxAgeMs: Long = UpdateCheck.MAX_AGE_MS,
         networkCameUp: Boolean = false,
     ) {
+        if (!BuildConfig.OFFICIAL_UPDATES) return
         checker?.check(force, maxAgeMs, networkCameUp, when {
             force -> "forced"
             networkCameUp -> "network"
@@ -126,8 +136,11 @@ object Updates {
         })
     }
 
-    fun diagnostics(): String = if (!started) "not initialized" else
-        "known=${prefs.getString("latest", null) ?: "unknown"}; notes=${notes.size}; ${checker?.diagnostics}"
+    fun diagnostics(): String = when {
+        !started -> "not initialized"
+        !BuildConfig.OFFICIAL_UPDATES -> "disabled in this build"
+        else -> "known=${prefs.getString("latest", null) ?: "unknown"}; notes=${notes.size}; ${checker?.diagnostics}"
+    }
 
     /**
      * The release notes for [available], from the copy kept with the version it was read for, else
